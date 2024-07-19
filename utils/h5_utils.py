@@ -74,6 +74,7 @@ def get_hwc_imgs(file, ids, tags, scale, crop0, crop1, norm):
 def get_chw_imgs(file, ids, tags, scale, crop0, crop1, norm):
   """From a list of tuples, returns the correct cropped img"""
   for id in ids:
+    print(id)
     im = get_hwc_img(file[id[0]], id[1], tags, scale, crop0, crop1, norm)
     if im is None:
       print(f'warn: {file[id[0]]} {id[1]} {tags} is None!')

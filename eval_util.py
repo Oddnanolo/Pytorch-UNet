@@ -39,8 +39,8 @@ def eval_loss(net, criterion, dataset, gpu=False):
             true_mask = true_mask.cuda()
 
         masks_pred = net(img)
-        masks_probs_flat = masks_pred.view(-1)
-        true_masks_flat = true_mask.view(-1)
+        masks_probs_flat = masks_pred.reshape(-1)
+        true_masks_flat = true_mask.reshape(-1)
 
         loss = criterion(masks_probs_flat, true_masks_flat)
         tot += loss.item()

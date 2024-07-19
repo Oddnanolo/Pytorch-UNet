@@ -167,8 +167,8 @@ def train_net(net,
                 true_masks = true_masks.cuda()
 
             masks_pred = net(imgs)
-            masks_probs_flat = masks_pred.view(-1)
-            true_masks_flat = true_masks.view(-1)
+            masks_probs_flat = masks_pred.reshape(-1)
+            true_masks_flat = true_masks.reshape(-1)
 
             loss = criterion(masks_probs_flat, true_masks_flat)
             epoch_loss += loss.item()
@@ -191,11 +191,10 @@ def train_net(net,
 
         if True:
             val1, val2 = itertools.tee(val, 2)
-            
             # val_dice = eval_dice(net, val1, gpu)
             # print('Validation Dice Coeff: {:.4f}, {:.6f}'.format(epoch, val_dice))
             # print('{:.4f}, {:.6f}'.format(epoch, val_dice), file=outfile_eval_dice, flush=True)
-
+        
             val_loss = eval_loss(net, criterion, val2, gpu)
             print('Validation Loss: {:.4f}, {:.6f}'.format(epoch, val_loss))
             print('{:.4f}, {:.6f}'.format(epoch, val_loss), file=outfile_eval_loss, flush=True)
