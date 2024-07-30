@@ -1,4 +1,4 @@
-data/
+data*/
 cpp/*.ts
 test/
 checkpoints/
@@ -8,6 +8,7 @@ backup
 .vscode/
 *.pyc
 *.pth
+*.pdf
 *.pt
 *.jpg
 *.csv
