@@ -32,10 +32,12 @@ def lr_exp_decay(optimizer, lr0, gamma, epoch):
 
 def train_net(net,
               im_tags = ['frame_loose_lf0', 'frame_mp2_roi0', 'frame_mp3_roi0'],
-              ma_tags = ['frame_ductor0'],
+              ma_tags = ['frame_deposplat0'],
               truth_th = 100,
-              file_img  = [f"data/g4-rec-r{i}.h5" for i in range(10)],
-              file_mask = [f"data/g4-tru-r{i}.h5" for i in range(10)],
+              file_img = ["data2/drive/55333549_1102/g4-rec-0.h5"],
+              file_mask = ["data2/drive/55333549_1102/g4-tru-0.h5"],
+              #file_img  = [f"data2/drive/55333549_110{i}/g4-rec-{j}.h5" for i in range(4) for j in range(2)],
+              #file_mask = [f"data2/drive/55333549_110{i}/g4-tru-{j}.h5" for i in range(4) for j in range(2)],
               sepoch=0,
               nepoch=1,
               strain=0,
@@ -49,17 +51,21 @@ def train_net(net,
               gpu=False,
               img_scale=0.5):
 
-    dir_checkpoint = 'checkpoints/'
+    dir_checkpoint = 'checkpoints_test/'
     if not os.path.exists(dir_checkpoint):
         os.makedirs(dir_checkpoint)
 
     iddataset = {}
-    event_per_file = 10
+    event_per_file = 1
     event_zero_id_offset = 100
     def id_gen(index):
         return (index // event_per_file, index % event_per_file + event_zero_id_offset)
     iddataset['train'] = [id_gen(i) for i in list(strain+np.arange(ntrain))]
+    iddataset['train_mask'] = [(0,0)]
     iddataset['val'] = [id_gen(i) for i in list(sval+np.arange(nval))]
+    iddataset['val_mask'] = [(0,0)]
+    #iddataset['train_mask'] = [(i,0) for i in range(90)]
+    #iddataset['val_mask'] = [(90+i, 0) for i in range(10)]
 
     outfile_log = open(dir_checkpoint+'/log','a+')
 
@@ -123,7 +129,8 @@ def train_net(net,
         x_range = [476, 952] # PDVD, V
         y_range = [0, 600]
         z_scale = 4000
-        
+        print("Val thing", iddataset['val'])
+        print("Train thing", iddataset['train'])
         print('''
         file_img: {}
         file_mask: {}
@@ -131,14 +138,13 @@ def train_net(net,
 
         print('Starting epoch {}/{}.'.format(epoch, nepoch))
         net.train()
-
         train = zip(
           h5u.get_chw_imgs(file_img, iddataset['train'], im_tags, rebin, x_range, y_range, z_scale),
-          h5u.get_masks(file_mask,   iddataset['train'], ma_tags, rebin, x_range, y_range, truth_th)
+          h5u.get_masks(file_mask,   iddataset['train_mask'], ma_tags, rebin, x_range, y_range, truth_th)
         )
         val = zip(
           h5u.get_chw_imgs(file_img, iddataset['val'],   im_tags, rebin, x_range, y_range, z_scale),
-          h5u.get_masks(file_mask,   iddataset['val'],   ma_tags, rebin, x_range, y_range, truth_th)
+          h5u.get_masks(file_mask,   iddataset['val_mask'],   ma_tags, rebin, x_range, y_range, truth_th)
         )
         eval_data = []
         for i in range(len(eval_imgs)):
@@ -195,6 +201,7 @@ def train_net(net,
             # print('Validation Dice Coeff: {:.4f}, {:.6f}'.format(epoch, val_dice))
             # print('{:.4f}, {:.6f}'.format(epoch, val_dice), file=outfile_eval_dice, flush=True)
         
+            print(val2)
             val_loss = eval_loss(net, criterion, val2, gpu)
             print('Validation Loss: {:.4f}, {:.6f}'.format(epoch, val_loss))
             print('{:.4f}, {:.6f}'.format(epoch, val_loss), file=outfile_eval_loss, flush=True)
@@ -244,7 +251,7 @@ if __name__ == '__main__':
     # im_tags = ['frame_tight_lf0', 'frame_loose_lf0'] #lt
     im_tags = ['frame_loose_lf0', 'frame_mp2_roi0', 'frame_mp3_roi0']    # l23
     # im_tags = ['frame_loose_lf0', 'frame_tight_lf0', 'frame_mp2_roi0', 'frame_mp3_roi0']    # lt23
-    ma_tags = ['frame_ductor0']
+    ma_tags = ['frame_deposplat0']
     truth_th = 10
 
     net = UNet(len(im_tags), len(ma_tags))
